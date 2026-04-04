@@ -1,12 +1,12 @@
 from repo.db import SessionLocal,base
-from sqlalchemy import Column,String,Integer,DateTime
+from sqlalchemy import Column,String,Integer,DateTime,Float
 
 class Records(base):
     __tablename__ = "records"
     record_id=Column(Integer,primary_key=True,autoincrement=True)
     record_type=Column(String,nullable=False)
     category=Column(String,nullable=False)
-    amount=Column(Integer,nullable=False)
+    amount=Column(Float,nullable=False)
     create_date=Column(DateTime,nullable=False)
     description=Column(String)
 
@@ -38,7 +38,7 @@ def add_records(role_auth,type,category,amount,datetime,description):
         db.add(record)
         db.commit()
 
-def update_records(role_auth,record_id,amount,description):
+def update_records(role_auth,record_id,amount,description,type):
     if role_auth and record_id :
         with SessionLocal() as db:
             record=db.query(Records).filter(Records.record_id == record_id).first()
@@ -46,6 +46,8 @@ def update_records(role_auth,record_id,amount,description):
                 record.amount = amount
             if description is not None:
                 record.description = description
+            if type is not None:
+                record.record_type = type
             
             db.commit()
 
