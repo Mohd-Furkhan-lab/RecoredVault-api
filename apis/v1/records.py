@@ -1,33 +1,27 @@
 from fastapi import APIRouter, Depends
-from typing import Optional
-from datetime import datetime
 from dependencies.depends import require_role,is_admin
-
+from services.records_services import addRecords,getRecords,updateRecords,deleteRecords,getrecordSummary
+from schemas.records_schemas import getrecords,updaterecords,addrecords
 records = APIRouter(prefix='/records',tags=['records'])
 
 
 @records.get('/summary')
 def get_summary(is_user = Depends(require_role("user"))):
-    return {'message':' records summary '}
+   return getrecordSummary(is_user)
+    
 
 @records.get('/')
-def get_records(type:Optional[str]=None,category:Optional[str]=None,date=Optional[datetime],user=Depends(require_role("analyst" , "admin"))):
-    if type and not category and not date:
-        return {'message':'records filter by type'}
-    elif category and not type and not date:
-        return {'message':'records filter by category'}
-    elif date and not category and not type:
-        return {'message':'records filter by date'}
-    return {'message':'all records '}
+def get_records(data:getrecords,user=Depends(require_role("analyst" , "admin"))):
+    return getRecords(user,data)
 
 @records.post('/')
-def add_records(is_admin = Depends(is_admin)):
-    return {'message':'add records'}
+def add_records(data:addrecords,is_admin = Depends(is_admin)):
+    return addRecords(is_admin,data)
 
 @records.put('/{rec_id}')
-def update_records(is_admin = Depends(is_admin)):
-    return {'message':'update records'}
+def update_records(rec_id,data:updaterecords,is_admin = Depends(is_admin)):
+    return updateRecords(is_admin,data,rec_id)
 
 @records.delete('/{rec_id}')
-def delete_records(is_admin = Depends(is_admin)):
-    return {'message':'delete records'}
+def delete_records(rec_id,is_admin = Depends(is_admin)):
+    return deleteRecords(is_admin,rec_id)
