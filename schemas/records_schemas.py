@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 class addrecords(BaseModel):
+    user_id : str
     type : str
     category : str
     amount : float
@@ -10,6 +11,7 @@ class addrecords(BaseModel):
     description : str
 
 class updaterecords(BaseModel):
+    user_id : str
     amount : Optional[float] = None
     description : Optional[str] = None
     type : Optional[str] = None

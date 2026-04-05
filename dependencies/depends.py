@@ -10,7 +10,7 @@ async def get_current_user(credentials= Depends(security)):
     payload = verify_token(token)
 
     if not payload:
-        raise HTTPException(status_code=401,details="Invalid Token")
+        raise HTTPException(status_code=401,detail="Invalid Token")
     
     return payload
 

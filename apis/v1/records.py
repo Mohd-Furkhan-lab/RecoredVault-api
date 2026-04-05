@@ -6,8 +6,9 @@ records = APIRouter(prefix='/records',tags=['records'])
 
 
 @records.get('/summary')
-def get_summary(is_user = Depends(require_role("user"))):
-   return getrecordSummary(is_user)
+def get_summary(is_user = Depends(require_role("user","admin","analyst"))):
+   user_id = is_user['user_id']
+   return getrecordSummary(is_user,user_id)
     
 
 @records.get('/')

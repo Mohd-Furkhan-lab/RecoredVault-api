@@ -3,7 +3,7 @@ from sqlalchemy import Column,Integer,String
 from sqlalchemy.exc import SQLAlchemyError
 
 class Users(Base):
-    __tablename__ = "users"
+    __tablename__ = "Users"
     user_id = Column(String,primary_key=True,nullable=False)
     user_name = Column(String,nullable=False)
     user_email = Column(String,nullable=False,unique=True)

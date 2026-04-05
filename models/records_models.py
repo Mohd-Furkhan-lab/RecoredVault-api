@@ -1,10 +1,11 @@
 from repo.db import SessionLocal,Base
-from sqlalchemy import Column,String,Integer,DateTime,Float,func
+from sqlalchemy import Column,String,Integer,DateTime,Float,func,ForeignKey
 from sqlalchemy.exc import SQLAlchemyError
 
 class Records(Base):
     __tablename__ = "records"
     record_id=Column(Integer,primary_key=True,autoincrement=True)
+    user_id = Column(ForeignKey("Users.user_id"))
     record_type=Column(String,nullable=False)
     category=Column(String,nullable=False)
     amount=Column(Float,nullable=False)
@@ -28,10 +29,11 @@ def  get_records(type,category):
     except SQLAlchemyError:
         return False
 
-def add_records(type,category,amount,datetime,description):
+def add_records(user_id,type,category,amount,datetime,description):
     try :
         with SessionLocal() as db:
             record=Records(
+                user_id = user_id,
                 record_type = type,
                 category=category,
                 amount = amount,
@@ -41,49 +43,53 @@ def add_records(type,category,amount,datetime,description):
             db.add(record)
             db.commit()
             return True
-    except SQLAlchemyError :
+    except SQLAlchemyError:
         db.rollback()
         return False
 
-def update_records(record_id,amount,description,type):
+def update_records(user_id,record_id,amount,description,type):
     try:
         if record_id :
             with SessionLocal() as db:
-                record=db.query(Records).filter(Records.record_id == record_id).first()
-                if amount is not None:
-                    record.amount = amount
-                if description is not None:
-                    record.description = description
-                if type is not None:
-                    record.record_type = type            
+                is_records = db.query(1).filter(Records.user_id == user_id).first()
+                if is_records:
+                    record=db.query(Records).filter(Records.record_id == record_id,Records.user_id == user_id).first()
+                    if amount is not None:
+                        record.amount = amount
+                    if description is not None:
+                        record.description = description
+                    if type is not None:
+                        record.record_type = type            
+                    db.commit()
+                    return True
+    except SQLAlchemyError:
+        db.rollback()
+        return False
+
+def delete_record(record_id,user_id):
+    try:
+        with SessionLocal() as db:
+            record=db.query(Records).filter(Records.record_id == record_id,Records.user_id == user_id).first()
+            if record:
+                db.delete(record)
                 db.commit()
                 return True
     except SQLAlchemyError:
         db.rollback()
         return False
 
-def delete_record(record_id):
+def records_summary(user_id):
     try:
         with SessionLocal() as db:
-            record=db.query(Records).filter(Records.record_id == record_id)
-            db.delete(record)
-            db.commit()
-            return True
+            is_records=db.query(1).filter(Records.user_id == user_id).first()
+            if is_records:
+                total_expense = db.query(func.sum(Records.amount)).filter(Records.record_type  == "expense",Records.user_id == user_id).scalar()
+                total_income = db.query(func.sum(Records.amount)).filter(Records.record_type == "income",Records.user_id == user_id).scalar()
+                net_balance = total_income - total_expense
+                return {
+                    "total_income" : total_income,
+                    "total_expense" : total_expense,
+                    "net_balance" : net_balance
+                }
     except SQLAlchemyError:
-        db.rollback()
-        return False
-
-def records_summary():
-    try:
-        with SessionLocal() as db:
-            total_expense = db.query(func.sum(Records.amount)).filter(Records.record_type  == "expense").scalar()
-            total_income = db.query(func.sum(Records.amount)).filter(Records.record_type == "income").scalar()
-            net_balance = total_income - total_expense
-            return {
-                "total_income" : total_income,
-                "total_expense" : total_expense,
-                "net_balance" : net_balance
-            }
-    except SQLAlchemyError:
-
         return False
