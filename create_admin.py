@@ -1,24 +1,39 @@
 from repo.db import SessionLocal,Base,engine
 from models.users_models import Users
 import bcrypt
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+admin_name = os.getenv("admin_name")
+admin_password = os.getenv("admin_password")
 
 Base.metadata.create_all(bind=engine)
 
-password = "Your password here"
 
-hash_passsword = bcrypt.hashpw(password.encode(),bcrypt.gensalt())
 
-with SessionLocal() as db:
-    admin = Users(
-        user_id = "Your id here",
-        user_name = "Your name here",
-        user_email = "Your mail here",
-        user_password = hash_passsword,
-        role = "admin",
-        is_active = "true"
-    )
-    db.add(admin)
-    db.commit()
-    print("Admin Created")
-    print("Email : your email")
-    print("password : your password")
+hash_passsword = bcrypt.hashpw(admin_password.encode(),bcrypt.gensalt())
+
+def createadmin():
+    with SessionLocal() as db:
+        existing = db.query(Users).filter(Users.user_name == admin_name).first()
+
+        if existing:
+            print("Admin already exists")
+            return
+
+        hash_password = bcrypt.hashpw(admin_password.encode(), bcrypt.gensalt())
+
+        admin = Users(
+            user_name=admin_name,
+            user_email="admin@recordvault.com",
+            user_password=hash_password,
+            role="admin",
+            is_active=True
+        )
+
+        db.add(admin)
+        db.commit()
+
+        print("Admin created")
