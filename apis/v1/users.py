@@ -30,4 +30,3 @@ def delete(user_id,is_admin = Depends(is_admin)):
 @users.get('/')
 def get_allusers(data:GetUsers,is_admin = Depends(is_admin)):
     return getUsers(is_admin,data)
-

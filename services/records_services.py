@@ -1,4 +1,5 @@
 from models.records_models import add_records,update_records,delete_record,get_records,records_summary
+from fastapi import HTTPException
 
 def addRecords(is_admin,data):
     if is_admin:
@@ -12,7 +13,7 @@ def addRecords(is_admin,data):
         if res:
             return {'message' : 'added successfully'}
         else:
-            return {'message' : 'an error occured'}
+            raise HTTPException(500,detail="cant add record an error occured")
 
 def updateRecords(is_admin,data,recordId):
     if is_admin:
@@ -24,7 +25,7 @@ def updateRecords(is_admin,data,recordId):
         if res:
             return {'message':'updated successfully'}
         else:
-            return {'message':'an error occured'}
+            raise HTTPException(404,detail="details not find or wrong data")
 
 def deleteRecords(data,is_admin,record_id):
     if is_admin:
@@ -33,7 +34,7 @@ def deleteRecords(data,is_admin,record_id):
         if res:
             return {'message':'deleted successfully'}
         else:
-            return {'message':'an error occured'}
+            raise HTTPException(404,detail="record not found")
         
 
 def getRecords(is_authorize,data):
@@ -44,7 +45,8 @@ def getRecords(is_authorize,data):
         if records:
             return {'data': records }
         else:
-            return {'message':'an error occured'}
+            raise HTTPException(404,detail="records not found")
+
         
 def getrecordSummary(is_allowed,userid):
     if is_allowed:
@@ -53,4 +55,4 @@ def getrecordSummary(is_allowed,userid):
         if data:
             return {'summary' : data}
         else:
-            return {'message' : 'an error occured'}
+            raise HTTPException(404,detail="data not found")

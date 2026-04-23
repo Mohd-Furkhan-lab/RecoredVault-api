@@ -2,21 +2,29 @@ from models.users_models import add_user,update_user,get_users,delete_users,getp
 from auth.jwt_token import create_token
 import uuid
 import bcrypt
+from fastapi import HTTPException
 
 def addUsers(is_admin,data):
     if is_admin:
-        id=str(uuid.uuid4())
-        name = data.user_name
-        email = data.user_email
-        password = data.user_password
-        role = data.user_role
-        status = data.user_status
-        hash_password = bcrypt.hashpw(password.encode(),bcrypt.gensalt())
-        res=add_user(id,name,email,hash_password,role,status)
-        if res:
-            return {'message':'added successfully'}
-        else :
-            return {'message':'an error occured'}
+        try:
+            id=str(uuid.uuid4())
+            name = data.user_name
+            email = data.user_email
+            password = data.user_password
+            role = data.user_role
+            status = data.user_status
+            hash_password = bcrypt.hashpw(password.encode(),bcrypt.gensalt())
+            res=add_user(id,name,email,hash_password,role,status)
+            if res:
+                return {'message': 'added successfully'}
+            else:
+                raise HTTPException(status_code=500, detail="failed to add user")
+        except HTTPException:
+            raise  # re-raise HTTP exceptions as-is
+        except Exception as e:
+            raise HTTPException(status_code=409, detail="user already exists") 
+            
+            
 
 def upateUsers(is_admin,data,userid):
     if is_admin:
@@ -26,7 +34,7 @@ def upateUsers(is_admin,data,userid):
         if res:
             return {'message':'update seccessfully'}
         else:
-            return {'message':'an error occured'}
+            raise HTTPException(404,detail="user not found")
 
 def deleteUser(is_admin,user_id):
     if is_admin:
@@ -35,7 +43,7 @@ def deleteUser(is_admin,user_id):
         if res:
             return {'message':'user deleted successfully'}
         else:
-            return {'message':'an error occured'}
+            raise HTTPException(404,detail="user not found")
 
 def getUsers(is_admin,data):
     if is_admin:
@@ -45,16 +53,20 @@ def getUsers(is_admin,data):
         if data:
             return {'users' : data}
         else:
-            return {'message':'an error occured'}
+            raise HTTPException(404,detail="no data found")
     
 def LoginUser(data):
     email = data.user_email
     password = data.user_password 
     storedpassword = getpassword(email)
-    is_authenticate = bcrypt.checkpw(password.encode(),storedpassword[0])
-    credentials = getroleandid(is_authenticate,email)
-    role = credentials['role']
-    userid = credentials['userid']
-    token =  create_token(userid[0],role[0])
-    return {'message':f'token = {token}'}
+    if storedpassword:
+        is_authenticate = bcrypt.checkpw(password.encode(),storedpassword[0])
+        credentials = getroleandid(is_authenticate,email)
+        role = credentials['role']
+        userid = credentials['userid']
+        token =  create_token(userid[0],role[0])
+        return {'message':f'token = {token}'}
+    else:
+        raise HTTPException(404,detail="user not found")
+
 
