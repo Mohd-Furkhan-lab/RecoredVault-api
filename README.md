@@ -27,20 +27,23 @@ A **FastAPI** service with **SQLAlchemy**, **JWT** authentication, **dependency 
 
 2. **Environment variables** — create a `.env` file in the project root:
 
-   | Variable        | Purpose                          |
-   |----------------|-----------------------------------|
-   | `DATABASE_URL` | SQLAlchemy engine URL             |
-   | `SECRET_KEY`   | Symmetric key for signing JWTs    |
+   | Variable        | Purpose                           |
+   |-----------------|-----------------------------------|
+   | `DATABASE_URL`  | SQLAlchemy engine URL             |
+   | `SECRET_KEY`    | Symmetric key for signing JWTs    |
+   | `admin_name`    | Admin Name For Creting Admin      |
+   | `admin_password`| Admin password For Creting Admin  |
+   | `admin_email`   | Admin email For Creting Admin     |
 
-3. **Database tables** are created on application startup (`Base.metadata.create_all` in `app/main.py`).
+4. **Database tables** are created on application startup (`Base.metadata.create_all` in `app/main.py`).
 
-4. **Create an admin user** — edit placeholders in `create_admin.py`, then run:
+5. **Create an admin user** — edit placeholders in `create_admin.py`, then run:
 
    ```bash
    python create_admin.py
    ```
 
-5. **Run the API**:
+6. **Run the API**:
 
    ```bash
    uvicorn run:app --reload
